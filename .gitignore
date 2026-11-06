@@ -1,0 +1,10 @@
+# KSDD2 は CC BY-NC-SA 4.0 (非営利) のため再配布しない
+data/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+outputs/
+*.pt
+.DS_Store
