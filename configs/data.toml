@@ -1,0 +1,12 @@
+# データ処理の設定。乱数シードとサイズをここに集約し、結果を再現できるようにする。
+seed = 42
+val_fraction = 0.2      # train から切り出す検証データの割合 (層化)
+raw_dir = "data/raw/KSDD2"
+processed_dir = "data/processed"   # 前処理済みキャッシュ (Git には含めない)
+splits_path = "configs/splits.json"  # 分割結果 (ID のみ。画像は含まないのでコミット可)
+
+[image]
+# 元画像は約 640x230 (縦長ではなく横幅が小さい) で個体差がある。U-Net は 2 の累乗で
+# 縮小するため、32 の倍数に揃える。縦横比は多少歪むが、全画像に同じ変換をかければ問題ない。
+height = 320
+width = 128
