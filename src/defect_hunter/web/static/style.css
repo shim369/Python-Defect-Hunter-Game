@@ -92,3 +92,9 @@ td { font-variant-numeric: tabular-nums; }
 .slider-box input { width: min(340px, 100%); vertical-align: middle; margin-left: 10px; }
 .slider-box b { color: var(--ai); }
 .slider-box .note { margin: 6px 0 0; }
+
+/* 言語スイッチ */
+.top-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
+.lang-switch { display: inline-flex; border: 1px solid #34435f; border-radius: 999px; overflow: hidden; }
+.lang-switch button { border: 0; border-radius: 0; background: transparent; padding: 4px 14px; font-size: .8rem; color: var(--muted); transform: none !important; }
+.lang-switch button[aria-pressed="true"] { background: var(--accent); color: #1b1200; }

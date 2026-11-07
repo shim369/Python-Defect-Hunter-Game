@@ -103,3 +103,24 @@ def test_static_pages_served(client):
     assert client.get("/static/game.js").status_code == 200
     assert client.get("/assets/d0.jpg").status_code == 200
     assert client.get("/api/config").json()["width"] == W
+
+
+def test_i18n_dictionaries_are_complete(client):
+    """日本語/英語の辞書のキーが一致し、HTML と JS で使うキーが全て定義されている。"""
+    import re
+    from pathlib import Path
+
+    static = Path(__file__).parents[1] / "src" / "defect_hunter" / "web" / "static"
+    d = json.loads((static / "i18n.json").read_text(encoding="utf-8"))
+    assert set(d["ja"]) == set(d["en"])
+    assert all(v.strip() for lang in d.values() for v in lang.values())
+
+    html = (static / "index.html").read_text(encoding="utf-8")
+    used = set(re.findall(r'data-i18n(?:-html)?="(\w+)"', html))
+    js = (static / "game.js").read_text(encoding="utf-8")
+    for args in re.findall(r"\bt\(([^,)]*)", js):  # t(...) の最初の引数 (三項演算子の両側も拾う)
+        used |= set(re.findall(r'"(\w+)"', args))
+    used |= set(re.findall(r'"(win_\w+|tie)"', js))  # t(outcome) 用
+    assert {"btn_start", "r_defect", "win_ai", "tie", "s_final"} <= used  # 抽出が機能している
+    assert used <= set(d["ja"]), used - set(d["ja"])
+    assert client.get("/static/i18n.json").status_code == 200

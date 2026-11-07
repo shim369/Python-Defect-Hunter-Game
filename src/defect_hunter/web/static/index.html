@@ -15,24 +15,29 @@
       <path d="M16 3v7M16 22v7M3 16h7M22 16h7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       <circle cx="16" cy="16" r="2" fill="currentColor"/>
     </svg>
-    <span class="brand-name">欠陥ハンター</span>
+    <span class="brand-name" data-i18n="brand_name">欠陥ハンター</span>
   </div>
-  <div class="vs"><span class="chip human">YOU</span><span class="vs-mark">VS</span><span class="chip ai">AI</span></div>
+  <div class="top-right">
+    <div class="vs"><span class="chip human">YOU</span><span class="vs-mark">VS</span><span class="chip ai">AI</span></div>
+    <!-- 言語スイッチ。選択は localStorage に保存される -->
+    <div class="lang-switch" role="group" aria-label="Language">
+      <button type="button" data-lang="ja">日本語</button><button type="button" data-lang="en">EN</button>
+    </div>
+  </div>
 </header>
 
 <main>
   <!-- タイトル -->
   <section id="screen-title" class="card hero">
     <p class="eyebrow">SURFACE DEFECT INSPECTION</p>
-    <h1>金属表面の<span class="hl">欠陥</span>を、<br>AI より先に見つけろ。</h1>
-    <p class="lead">画像から欠陥と思う場所をマウスでなぞってください。欠陥がなさそうなら「欠陥なし」。<br>
-       同じ画像を小さな U-Net も判定し、<b>IoU</b> で点数を比べます。</p>
+    <h1 data-i18n-html="hero_h1"></h1>
+    <p class="lead" data-i18n-html="lead"></p>
     <ul class="rules">
-      <li><b>10</b> 問<small>欠陥あり 6 / 良品 4</small></li>
-      <li><b>5</b> 問ごとに成績<small>Precision / Recall / F1</small></li>
-      <li><b>IoU</b> で採点<small>重なりが大きいほど高得点</small></li>
+      <li data-i18n-html="rule_1"></li>
+      <li data-i18n-html="rule_2"></li>
+      <li data-i18n-html="rule_3"></li>
     </ul>
-    <button id="btn-start" class="primary big">検査をはじめる</button>
+    <button id="btn-start" class="primary big" data-i18n="btn_start"></button>
   </section>
 
   <!-- 出題 -->
@@ -47,12 +52,12 @@
         <canvas id="canvas-draw"></canvas>
       </div>
       <div class="controls">
-        <h3>操作</h3>
-        <label class="brush">ブラシの太さ <input type="range" id="brush" min="1" max="8" value="3"></label>
-        <button id="btn-clear">やり直し</button>
-        <button id="btn-nodefect">欠陥なし</button>
-        <button id="btn-submit" class="primary">提出する</button>
-        <p class="note">欠陥だと思う場所をドラッグでなぞります。何も描かずに「提出」すると「欠陥なし」と同じ扱いです。</p>
+        <h3 data-i18n="controls"></h3>
+        <label class="brush"><span data-i18n="brush"></span> <input type="range" id="brush" min="1" max="8" value="3"></label>
+        <button id="btn-clear" data-i18n="btn_clear"></button>
+        <button id="btn-nodefect" data-i18n="btn_nodefect"></button>
+        <button id="btn-submit" class="primary" data-i18n="btn_submit"></button>
+        <p class="note" data-i18n="controls_note"></p>
       </div>
     </div>
   </section>
@@ -61,12 +66,12 @@
   <section id="screen-result" class="card" hidden>
     <h2 id="r-title"></h2>
     <div class="panels">
-      <figure><canvas id="p-image"></canvas><figcaption><i class="dot plain"></i>元画像</figcaption></figure>
-      <figure><canvas id="p-gt"></canvas><figcaption><i class="dot gt"></i>正解</figcaption></figure>
+      <figure><canvas id="p-image"></canvas><figcaption><i class="dot plain"></i><span data-i18n="cap_image"></span></figcaption></figure>
+      <figure><canvas id="p-gt"></canvas><figcaption><i class="dot gt"></i><span data-i18n="cap_gt"></span></figcaption></figure>
       <figure><canvas id="p-player"></canvas><figcaption id="cap-player"></figcaption></figure>
       <figure><canvas id="p-ai"></canvas><figcaption id="cap-ai"></figcaption></figure>
     </div>
-    <button id="btn-next" class="primary">次へ</button>
+    <button id="btn-next" class="primary"></button>
   </section>
 
   <!-- 中間・最終成績 -->
@@ -74,14 +79,14 @@
     <h2 id="s-title"></h2>
     <table id="s-table"></table>
     <div class="slider-box">
-      <label>AI の判定しきい値 <b id="thr-val" class="mono"></b>
+      <label><span data-i18n="thr_label"></span> <b id="thr-val" class="mono"></b>
         <input type="range" id="thr" min="0.01" max="0.99" step="0.01"></label>
-      <p class="note">低いほど AI は「欠陥あり」と答えやすくなります。動かして AI の Precision / Recall の変化を見てみましょう。</p>
+      <p class="note" data-i18n="thr_note"></p>
     </div>
     <button id="btn-continue" class="primary"></button>
   </section>
 </main>
-<footer>Dataset: KolektorSDD2 (CC BY-NC-SA 4.0, ViCoS Lab) — 非営利目的</footer>
+<footer data-i18n="footer"></footer>
 <script src="/static/game.js"></script>
 </body>
 </html>

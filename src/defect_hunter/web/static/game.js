@@ -4,8 +4,29 @@ const SCALE = 2;          // 表示倍率 (画像は 128x320 と小さいので�
 const SUMMARY_EVERY = 5;  // 何問ごとに中間成績を出すか
 const $ = (id) => document.getElementById(id);
 
-const state = { cfg: null, questions: [], idx: 0, results: [], threshold: 0.5 };
-let W = 0, H = 0;         // 内部解像度 (幅, 高さ)
+const state = { view: "title", lastResult: null, cfg: null, questions: [], idx: 0, results: [], threshold: 0.5 };
+let W = 0, H = 0;
+
+// ---------- 多言語 (日本語 / English) ----------
+// 文言は i18n.json に置く。選択は localStorage に保存し、初回はブラウザの言語で決める。
+let STR = {};
+const saved = localStorage.getItem("lang");
+let lang = saved || ((navigator.language || "").toLowerCase().startsWith("ja") ? "ja" : "en");
+const t = (key, vars = {}) => (STR[lang]?.[key] ?? key).replace(/\{(\w+)\}/g, (_, n) => vars[n]);
+function applyStatic() {
+  document.documentElement.lang = lang;
+  document.title = t("doc_title");
+  for (const el of document.querySelectorAll("[data-i18n]")) el.textContent = t(el.dataset.i18n);
+  for (const el of document.querySelectorAll("[data-i18n-html]")) el.innerHTML = t(el.dataset.i18nHtml);   // 辞書は自前の固定文字列のみ
+  for (const b of document.querySelectorAll(".lang-switch button")) b.setAttribute("aria-pressed", String(b.dataset.lang === lang));
+}
+// 言語を切り替えたら、いま表示中の画面の動的な文言も作り直す
+async function setLang(l) {
+  lang = l; localStorage.setItem("lang", l); applyStatic();
+  if (state.view === "question") renderQuestionText();
+  else if (state.view === "result" && state.lastResult) renderResultText(state.lastResult);
+  else if (state.view === "summary") await showSummary();
+}         // 内部解像度 (幅, 高さ)
 
 async function api(path, body) {
   const res = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" },
@@ -14,6 +35,7 @@ async function api(path, body) {
   return res.json();
 }
 function show(name) {
+  state.view = name;
   for (const s of document.querySelectorAll("main > section")) s.hidden = (s.id !== `screen-${name}`);
 }
 function loadImage(url) {
@@ -57,14 +79,17 @@ async function startGame() {
   state.idx = 0; state.results = [];
   await showQuestion();
 }
+function renderQuestionText() {
+  $("q-progress").textContent = `Q${state.idx + 1} / ${state.questions.length}`;
+  $("q-bar").style.width = `${(state.idx / state.questions.length) * 100}%`;
+}
 async function showQuestion() {
   const q = state.questions[state.idx];
   const im = await loadImage(q.image_url);
   sizeCanvas(imgC); sizeCanvas(drawC); maskC.width = W; maskC.height = H;
   imgC.getContext("2d").drawImage(im, 0, 0, W, H);
   resetMask();
-  $("q-progress").textContent = `Q${state.idx + 1} / ${state.questions.length}`;
-  $("q-bar").style.width = `${(state.idx / state.questions.length) * 100}%`;
+  renderQuestionText();
   $("btn-submit").disabled = $("btn-nodefect").disabled = false;
   show("question");
 }
@@ -97,6 +122,14 @@ function toImageData(im) {
   const x = c.getContext("2d"); x.drawImage(im, 0, 0, W, H); return x.getImageData(0, 0, W, H);
 }
 let aiProb = null;   // 現在の結果画面の AI 確率マップ (ImageData)
+function renderResultText(r) {
+  const outcome = r.player_iou > r.ai_iou ? "win_player" : (r.player_iou < r.ai_iou ? "win_ai" : "tie");
+  $("r-title").innerHTML = t(r.gt_has_defect ? "r_defect" : "r_clean") + ` — <span class="${r.player_iou >= r.ai_iou ? "good" : "bad"}">${t(outcome)}</span>`;
+  $("cap-player").innerHTML = `<i class="dot human"></i>${t("cap_player", { v: r.player_iou.toFixed(3) })}`;
+  $("cap-ai").innerHTML = `<i class="dot ai"></i>${t("cap_ai", { v: r.ai_iou.toFixed(3) })}`;
+  const atSummary = state.results.length % SUMMARY_EVERY === 0 || state.idx === state.questions.length - 1;
+  $("btn-next").textContent = t(atSummary ? "btn_summary" : "btn_next");
+}
 async function showResult(r) {
   const [im, gtIm, probIm] = await Promise.all([loadImage(r.image_url), loadImage(r.gt_url), loadImage(r.prob_url)]);
   const plainCanvas = $("p-image"); sizeCanvas(plainCanvas); plainCanvas.getContext("2d").drawImage(im, 0, 0, W, H);
@@ -104,11 +137,8 @@ async function showResult(r) {
   paintPanel($("p-player"), im, [255, 70, 70], r.playerMask ? toImageData(await loadImage(r.playerMask)) : null, (v) => v > 127);
   aiProb = toImageData(probIm);
   paintPanel($("p-ai"), im, [70, 140, 255], aiProb, (v) => v / 255 >= r.default_threshold);
-  const ok = (r.player_iou > r.ai_iou) ? "あなたの勝ち!" : (r.player_iou < r.ai_iou ? "AI の勝ち" : "引き分け");
-  $("r-title").innerHTML = (r.gt_has_defect ? "この画像には<b>欠陥あり</b>" : "この画像は<b>良品 (欠陥なし)</b>") + ` — <span class="${r.player_iou >= r.ai_iou ? "good" : "bad"}">${ok}</span>`;
-  $("cap-player").innerHTML = `<i class="dot human"></i>あなた IoU ${r.player_iou.toFixed(3)}`;
-  $("cap-ai").innerHTML = `<i class="dot ai"></i>AI IoU ${r.ai_iou.toFixed(3)}`;
-  $("btn-next").textContent = (state.results.length % SUMMARY_EVERY === 0 || state.idx === state.questions.length - 1) ? "成績を見る" : "次へ";
+  state.lastResult = r;
+  renderResultText(r);
   show("result");
 }
 
@@ -117,12 +147,12 @@ async function showSummary() {
   const answers = state.results.map((r) => ({ id: r.id, player_has_defect: r.player_has_defect }));
   const s = await api("/api/summary", { answers, threshold: state.threshold });
   const meanPlayerIou = state.results.reduce((a, r) => a + r.player_iou, 0) / state.results.length;
-  $("s-title").textContent = final ? `最終結果 (${s.n}問)` : `中間成績 (${s.n}問終了)`;
+  $("s-title").textContent = t(final ? "s_final" : "s_mid", { n: s.n });
   const row = (name, x, iou, cls) => `<tr class="${cls}"><td>${name}</td><td>${pct(x.precision)}</td><td>${pct(x.recall)}</td><td>${pct(x.f1)}</td><td>${iou.toFixed(3)}</td><td>${x.tp}/${x.fp}/${x.fn}/${x.tn}</td></tr>`;
-  $("s-table").innerHTML = "<tr><th></th><th>Precision</th><th>Recall</th><th>F1</th><th>平均IoU</th><th>TP/FP/FN/TN</th></tr>"
-    + row("あなた", s.player, meanPlayerIou, "row-human") + row("AI", s.ai, s.ai.mean_iou, "row-ai");
+  $("s-table").innerHTML = `<tr><th></th><th>Precision</th><th>Recall</th><th>F1</th><th>${t("th_mean_iou")}</th><th>TP/FP/FN/TN</th></tr>`
+    + row(t("who_you"), s.player, meanPlayerIou, "row-human") + row("AI", s.ai, s.ai.mean_iou, "row-ai");
   $("thr").value = s.threshold; $("thr-val").textContent = s.threshold.toFixed(2);
-  $("btn-continue").textContent = final ? "もう一度遊ぶ" : "続ける";
+  $("btn-continue").textContent = t(final ? "btn_again" : "btn_continue");
   show("summary");
 }
 let thrTimer = null;
@@ -145,4 +175,9 @@ $("btn-continue").onclick = async () => {
   state.idx++; await showQuestion();
 };
 
-(async () => { state.cfg = await api("/api/config"); W = state.cfg.width; H = state.cfg.height; })();
+for (const b of document.querySelectorAll(".lang-switch button")) b.onclick = () => setLang(b.dataset.lang);
+(async () => {
+  STR = await (await fetch("/static/i18n.json")).json();
+  applyStatic();
+  state.cfg = await api("/api/config"); W = state.cfg.width; H = state.cfg.height;
+})();
