@@ -1,4 +1,4 @@
-.PHONY: test check prepare train summary
+.PHONY: test check prepare train summary assets serve
 
 test:
 	uv run pytest -q
@@ -20,4 +20,12 @@ train:
 summary:
 	uv run python scripts/summarize.py
 
-# eval / serve は Phase 4-5 で追加する
+# ゲーム用素材 (画像・正解・AIの確率マップ) を outputs/game/ に生成
+assets:
+	uv run python scripts/build_game_assets.py
+
+# ゲームを起動 -> http://127.0.0.1:8000
+serve:
+	uv run uvicorn defect_hunter.app:app_factory --factory --host 127.0.0.1 --port 8000
+
+# eval は Phase 5 で追加する
