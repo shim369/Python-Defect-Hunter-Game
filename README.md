@@ -10,6 +10,16 @@ You trace the defect you see; a small U-Net I trained on CPU looks at the same i
 
 *Left to right, per example: input · ground truth (green) · AI prediction at threshold 0.5 (blue). The first three defective test images by ID, not hand-picked. Images are from KolektorSDD2 (see [License](#license--attribution)).*
 
+## Screenshots
+
+| Start screen | Playing: trace the defect |
+|---|---|
+| ![Start screen](docs/screenshots/en-1-title.jpg) | ![Playing](docs/screenshots/en-2-play.jpg) |
+| **Result: ground truth vs you vs AI, scored by IoU** | **Stats every 5 questions + AI threshold slider** |
+| ![Result](docs/screenshots/en-3-result.jpg) | ![Stats](docs/screenshots/en-4-stats.jpg) |
+
+*Captured from the running app (`make serve`, then open `http://127.0.0.1:8000/?seed=2` — the `seed` parameter fixes the question order). The images in the screenshots are from KolektorSDD2 (see [License](#license--attribution)).*
+
 ## What this project demonstrates
 
 | Skill | Where |
@@ -146,7 +156,7 @@ So: the same command gives the same result **on the same platform**; across oper
 
 ```
 configs/        data.toml, exp/*.toml (experiments), quick/ (repro check), splits.json (IDs only)
-docs/           requirements.md, screen-flow.md (mermaid), data_quality.md, samples/
+docs/           requirements.md, screen-flow.md (mermaid), data_quality.md, samples/, screenshots/
 results/        per-run JSON + summary.md
 scripts/        prepare, check_quality, summarize, reeval, build_game_assets, ...
 src/defect_hunter/   data, dataset, model, losses, metrics, evaluate, train, app, web/
@@ -156,5 +166,5 @@ tests/          pytest (metrics vs torchmetrics, data split, losses, API)
 ## License / attribution
 
 - **Code**: [MIT](LICENSE). This covers the code only — **not** the dataset or the images derived from it (below).
-- **Dataset**: [KolektorSDD2](https://www.vicos.si/resources/kolektorsdd2/) by the ViCoS Lab, University of Ljubljana, licensed **CC BY-NC-SA 4.0** (non-commercial, share-alike). `data/` is git-ignored and **must not be redistributed** from this repo. The few images shown in `docs/samples/` are derived from the dataset (resized, with overlays) and are shared under the same licence, for non-commercial use.
+- **Dataset**: [KolektorSDD2](https://www.vicos.si/resources/kolektorsdd2/) by the ViCoS Lab, University of Ljubljana, licensed **CC BY-NC-SA 4.0** (non-commercial, share-alike). `data/` is git-ignored and **must not be redistributed** from this repo. The few images shown in `docs/samples/` and `docs/screenshots/` are derived from the dataset (resized, with overlays) and are shared under the same licence, for non-commercial use.
 - Please cite the original work: Božič, Tabernik, Skočaj, *Mixed supervision for surface-defect detection: from weakly to fully supervised learning*, Computers in Industry, 2021.

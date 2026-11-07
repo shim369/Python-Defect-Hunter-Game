@@ -9,6 +9,16 @@
 
 *各例、左から: 入力 · 正解 (緑) · しきい値 0.5 の AI 予測 (青)。test の欠陥画像のうち ID が若い順の 3 枚で、選り好みはしていません。画像は KolektorSDD2 由来です ([ライセンス](#ライセンスと出典) 参照)。*
 
+## スクリーンショット
+
+| スタート画面 | プレイ中: 欠陥をなぞる |
+|---|---|
+| ![スタート画面](docs/screenshots/ja-1-title.jpg) | ![プレイ中](docs/screenshots/ja-2-play.jpg) |
+| **結果: 正解 / あなた / AI を IoU で採点** | **5 問ごとの成績 + AI のしきい値スライダー** |
+| ![結果](docs/screenshots/ja-3-result.jpg) | ![成績](docs/screenshots/ja-4-stats.jpg) |
+
+*実際に動いているアプリ (`make serve` 後に `http://127.0.0.1:8000/?seed=2` を開く。`seed` で出題順が固定されます) のキャプチャです。画像は KolektorSDD2 由来です ([ライセンス](#ライセンスと出典) 参照)。*
+
 ## このプロジェクトで示していること
 
 | スキル | 場所 |
@@ -145,7 +155,7 @@ docker run --rm -p 8000:8000 -v $PWD/outputs/game:/app/outputs/game:ro defect-hu
 
 ```
 configs/        data.toml、exp/*.toml (実験)、quick/ (再現性チェック)、splits.json (ID のみ)
-docs/           requirements.md、screen-flow.md (mermaid)、data_quality.md、samples/
+docs/           requirements.md、screen-flow.md (mermaid)、data_quality.md、samples/、screenshots/
 results/        実行ごとの JSON + summary.md
 scripts/        prepare、check_quality、summarize、reeval、build_game_assets、...
 src/defect_hunter/   data、dataset、model、losses、metrics、evaluate、train、app、web/
@@ -155,5 +165,5 @@ tests/          pytest (torchmetrics との突き合わせ、データ分割、�
 ## ライセンスと出典
 
 - **コード**: [MIT](LICENSE)。対象はコードのみで、データセットと、そこから作った画像 (下記) は**対象外**です。
-- **データセット**: [KolektorSDD2](https://www.vicos.si/resources/kolektorsdd2/)。リュブリャナ大学 ViCoS Lab 提供、**CC BY-NC-SA 4.0** (非営利・継承)。`data/` は Git 管理外で、このリポジトリから**再配布してはいけません**。`docs/samples/` に載せた数枚の画像はデータセット由来 (リサイズ、オーバーレイ付き) で、同じライセンスのもと、非営利目的でのみ共有しています。
+- **データセット**: [KolektorSDD2](https://www.vicos.si/resources/kolektorsdd2/)。リュブリャナ大学 ViCoS Lab 提供、**CC BY-NC-SA 4.0** (非営利・継承)。`data/` は Git 管理外で、このリポジトリから**再配布してはいけません**。`docs/samples/` と `docs/screenshots/` に載せた数枚の画像はデータセット由来 (リサイズ、オーバーレイ付き) で、同じライセンスのもと、非営利目的でのみ共有しています。
 - 元の研究を引用してください: Božič, Tabernik, Skočaj, *Mixed supervision for surface-defect detection: from weakly to fully supervised learning*, Computers in Industry, 2021.
