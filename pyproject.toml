@@ -28,3 +28,14 @@ packages = ["src/defect_hunter"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+# Linux では PyPI の torch が CUDA 同梱 (数 GB, aarch64 でも同様) になるため、CPU 版の index を使う。
+# macOS は PyPI のままで CPU 版が入る。
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
+torchvision = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
