@@ -1,0 +1,9 @@
+# 再現性チェック用の短い設定 (実際の比較実験は configs/exp/)。
+# 使う枚数は --limit で絞る。make repro-check から呼ばれる。
+loss = "bce_dice"
+oversample = 5
+epochs = 2
+batch_size = 16
+lr = 1e-3
+base = 8
+threads = 2

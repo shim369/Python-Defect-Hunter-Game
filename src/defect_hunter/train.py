@@ -52,7 +52,8 @@ def save_predictions(probs, ids, out_dir: Path, threshold: float) -> None:
 
 
 def run(exp_path: str, data_cfg_path: str = "configs/data.toml", max_epochs: int | None = None,
-        limit: int | None = None, out_root: str = "outputs", save_preds: bool = True) -> dict:
+        limit: int | None = None, out_root: str = "outputs", save_preds: bool = True,
+        results_dir: str = "results") -> dict:
     exp = tomllib.loads(Path(exp_path).read_text(encoding="utf-8"))
     cfg = load_config(data_cfg_path)
     name = Path(exp_path).stem
@@ -105,8 +106,8 @@ def run(exp_path: str, data_cfg_path: str = "configs/data.toml", max_epochs: int
     test_res = evaluate(test_probs, test_ds.masks, thr, min_area)
     result = {"name": name, "exp": exp, "threshold": thr, "min_area": min_area,
               "val": val_res, "test": test_res, "history": history}
-    Path("results").mkdir(exist_ok=True)
-    Path(f"results/{name}.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
+    Path(results_dir).mkdir(parents=True, exist_ok=True)
+    Path(results_dir, f"{name}.json").write_text(json.dumps(result, indent=1), encoding="utf-8")
     np.save(out_dir / "test_probs.npy", test_probs.astype(np.float16))
     if save_preds:
         save_predictions(test_probs, test_ds.ids, out_dir / "predictions", thr)
@@ -118,7 +119,8 @@ if __name__ == "__main__":
     ap.add_argument("exp")
     ap.add_argument("--epochs", type=int)
     ap.add_argument("--limit", type=int, help="動作確認用に使う枚数を絞る")
-    ap.add_argument("--out", default="outputs")
+    ap.add_argument("--out", default="outputs", help="チェックポイントと予測の出力先")
+    ap.add_argument("--results", default="results", help="結果 JSON の出力先")
     a = ap.parse_args()
-    r = run(a.exp, max_epochs=a.epochs, limit=a.limit, out_root=a.out)
+    r = run(a.exp, max_epochs=a.epochs, limit=a.limit, out_root=a.out, results_dir=a.results)
     print(json.dumps({"threshold": r["threshold"], "test": r["test"]}, indent=1))
