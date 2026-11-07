@@ -1,0 +1,7 @@
+# 不均衡対応の比較実験: focal_dice
+loss = "focal_dice"
+epochs = 15
+batch_size = 16
+lr = 1e-3
+base = 8   # CPU で現実的な時間に収めるため小さくした
+threads = 2

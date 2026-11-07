@@ -1,0 +1,8 @@
+# 不均衡対応の比較実験: bce_posw
+loss = "bce"
+pos_weight = 30   # 欠陥ピクセルの誤りを 30 倍重く罰する
+epochs = 15
+batch_size = 16
+lr = 1e-3
+base = 8   # CPU で現実的な時間に収めるため小さくした
+threads = 2

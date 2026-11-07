@@ -1,0 +1,9 @@
+# 不均衡対応の比較実験: bce_dice_oversample
+loss = "bce_dice"
+oversample = 5   # 欠陥画像を 5 倍の確率で引く
+epochs = 15
+batch_size = 16
+lr = 1e-3
+base = 8   # CPU で現実的な時間に収めるため小さくした
+threads = 1
+seed = 1   # 順位の安定性を見るための別シード
