@@ -75,7 +75,10 @@ for (const t of ["pointerup", "pointercancel"]) drawC.addEventListener(t, () => 
 
 // ---------- ゲーム進行 ----------
 async function startGame() {
-  state.questions = (await api("/api/round?n=10&defect_ratio=0.6")).questions;
+  // ?seed=整数 を付けると出題が固定される (デモ・スクリーンショット・再現用)
+  const seed = Number(new URLSearchParams(location.search).get("seed"));
+  const seedQ = Number.isInteger(seed) && new URLSearchParams(location.search).has("seed") ? `&seed=${seed}` : "";
+  state.questions = (await api(`/api/round?n=10&defect_ratio=0.6${seedQ}`)).questions;
   state.idx = 0; state.results = [];
   await showQuestion();
 }
